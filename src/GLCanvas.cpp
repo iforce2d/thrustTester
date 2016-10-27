@@ -88,6 +88,7 @@ void GLCanvas::showEvent(QShowEvent*)
 void GLCanvas::paintEvent(QPaintEvent*)
 {
     // Let the derived class do its specific stuff    
+    makeCurrent();
     if ( m_renderer )
         m_renderer->render();
     this->swapBuffers();

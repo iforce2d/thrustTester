@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QThread>
 #include <stdio.h>
 #include <stdarg.h>

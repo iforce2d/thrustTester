@@ -16,6 +16,8 @@ ExportDialog::ExportDialog(QWidget *parent) :
 
     g_mainWindow->tasks(m_tasks);
 
+    int resultCount = 0;
+
     for (int i = 0; i < (int)m_tasks.size(); i++) {
 
         TestTask* task = m_tasks[i];
@@ -28,7 +30,13 @@ ExportDialog::ExportDialog(QWidget *parent) :
                 ui->textBrowser->append(s);
             }
 
+            resultCount++;
         }
+    }
+
+    if ( resultCount < 1 ){
+        ui->uploadButton->setEnabled(false);
+        ui->saveFileButton->setEnabled(false);
     }
 
     m_requestInProgress = false;
@@ -123,19 +131,19 @@ void ExportDialog::on_uploadButton_clicked()
     QString bound = QString::fromUtf8("margin");
 
     QByteArray data;
-    data.append(QString(QString::fromUtf8("--") + bound + QString::fromUtf8("\r\n")).toAscii());
-    data.append(QString::fromUtf8("Content-Disposition: form-data; name=\"action\"\r\n\r\n").toAscii());
-    data.append(QString::fromUtf8("uploadReport.php\r\n").toAscii());
-    data.append((QString::fromUtf8("--") + bound + QString::fromUtf8("\r\n")).toAscii());
+    data.append(QString(QString::fromUtf8("--") + bound + QString::fromUtf8("\r\n")).toLatin1());
+    data.append(QString::fromUtf8("Content-Disposition: form-data; name=\"action\"\r\n\r\n").toLatin1());
+    data.append(QString::fromUtf8("uploadReport.php\r\n").toLatin1());
+    data.append((QString::fromUtf8("--") + bound + QString::fromUtf8("\r\n")).toLatin1());
 
-    data.append(QString::fromUtf8("Content-Disposition: form-data; name=\"report\"\r\n\r\n").toAscii());
-    data.append(QString::fromUtf8("%1\r\n").arg(str).toAscii());
-    data.append((QString::fromUtf8("--") + bound + QString::fromUtf8("--\r\n")).toAscii());  //closing boundary according to rfc 1867
+    data.append(QString::fromUtf8("Content-Disposition: ftoLatin1orm-data; name=\"report\"\r\n\r\n").toLatin1());
+    data.append(QString::fromUtf8("%1\r\n").arg(str).toLatin1());
+    data.append((QString::fromUtf8("--") + bound + QString::fromUtf8("--\r\n")).toLatin1());  //closing boundary according to rfc 1867
 
     QUrl serviceUrl = QUrl( QString::fromUtf8("http://www.iforce2d.net/tts/uploadReport.php") );
     QNetworkRequest request( serviceUrl );
-    request.setRawHeader(QString::fromUtf8("Content-Type").toAscii(),(QString::fromUtf8("multipart/form-data; boundary=") + bound).toAscii());
-    request.setRawHeader(QString::fromUtf8("Content-Length").toAscii(), QString::number(data.length()).toAscii());
+    request.setRawHeader(QString::fromUtf8("Content-Type").toLatin1(),(QString::fromUtf8("multipart/form-data; boundary=") + bound).toLatin1());
+    request.setRawHeader(QString::fromUtf8("Content-Length").toLatin1(), QString::number(data.length()).toLatin1());
 
     QNetworkAccessManager *networkManager = new QNetworkAccessManager(this);
     connect(networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(serviceRequestFinished(QNetworkReply*)));

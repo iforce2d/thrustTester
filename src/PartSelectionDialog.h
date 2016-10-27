@@ -2,7 +2,7 @@
 #define PARTSELECTIONDIALOG_H
 
 #include <QDialog>
-#include <QHttp>
+#include <QNetworkReply>
 #include <QHash>
 
 namespace Ui {
@@ -32,7 +32,6 @@ class PartSelectionDialog : public QDialog
 
     QHash<int, QString> m_urls;
     int m_currentPartCategory;
-    QHttp* m_http;
 
 public:
     explicit PartSelectionDialog(QWidget *parent = 0);
@@ -58,7 +57,7 @@ private:
     void updateMaterialCombobox();
 
 public slots:
-    void onRequestCompleted(bool error);
+    void onRequestCompleted(QNetworkReply *reply);
     void accept();
     void reject();
 };

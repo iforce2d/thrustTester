@@ -38,8 +38,8 @@ PartSelectionDialog::PartSelectionDialog(QWidget *parent) :
 
     m_requestInProgress = false;
 
-    m_http = new QHttp(this);
-    connect(m_http, SIGNAL(done(bool)), this, SLOT(onRequestCompleted(bool)));
+    //m_http = new QHttp(this);
+    //connect(m_http, SIGNAL(done(bool)), this, SLOT(onRequestCompleted(bool)));
 
     {
         SetBoolTemporarily dummy(&m_ignoreComboboxSelections, true);
@@ -93,28 +93,37 @@ void PartSelectionDialog::startRequest()
 
     //url.addQueryItem( "param" , value);
 
-    m_http->setHost( "www.iforce2d.net" );
-    m_http->get(url.toString());
+    /*m_http->setHost( "www.iforce2d.net" );
+    m_http->get(url.toString());*/
+
+    QUrl serviceUrl = QUrl( QString("http://www.iforce2d.net/") + m_urls[m_currentPartCategory] );
+    QNetworkRequest request( serviceUrl );
+
+    QByteArray data;
+
+    QNetworkAccessManager *networkManager = new QNetworkAccessManager(this);
+    connect(networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onRequestCompleted(QNetworkReply*)));
+    networkManager->post(request, data );
 
     g_log.log(LL_DEBUG, QString("Downloading %1 data...").arg( m_partNames[m_currentPartCategory]));
 }
 
-void PartSelectionDialog::onRequestCompleted(bool error)
+void PartSelectionDialog::onRequestCompleted(QNetworkReply *reply)
 {
-    g_log.log(LL_DEBUG, QString("Finished request, error:%1").arg(error));
+    g_log.log(LL_DEBUG, QString("Finished request, error:%1").arg(reply->error()));
 
     m_requestInProgress = false;
 
-    if ( error ) {
+    if ( reply->error() ) {
         ui->partsDownloadTextBrowser->append( "Error contacting server." );
-        ui->partsDownloadTextBrowser->append(m_http->errorString() );
+        ui->partsDownloadTextBrowser->append( reply->errorString() );
 
         ui->partsDownloadButton->setEnabled(true);
 
         return;
     }
 
-    QString jsonStr = m_http->readAll();
+    QString jsonStr = QString::fromUtf8( reply->readAll() );
     g_log.log(LL_DEBUG, QString("  response: %1").arg(jsonStr));
 
     Json::Value responseValue;
@@ -180,6 +189,9 @@ void PartSelectionDialog::updateMotorCombobox()
 {
     g_log.log(LL_DEBUG, __PRETTY_FUNCTION__);
 
+    if ( g_motorData == "" )
+        return; // probably first time run
+
     Json::Value arrayValue;
     Json::Reader reader;
     if ( ! reader.parse( g_motorData.toStdString(), arrayValue) )
@@ -215,6 +227,9 @@ void PartSelectionDialog::updateESCCombobox()
 {
     g_log.log(LL_DEBUG, __PRETTY_FUNCTION__);
 
+    if ( g_escData == "" )
+        return; // probably first time run
+
     Json::Value arrayValue;
     Json::Reader reader;
     if ( ! reader.parse( g_escData.toStdString(), arrayValue) )
@@ -247,6 +262,9 @@ void PartSelectionDialog::updateESCCombobox()
 void PartSelectionDialog::updatePropCombobox()
 {
     g_log.log(LL_DEBUG, __PRETTY_FUNCTION__);
+
+    if ( g_propData == "" )
+        return; // probably first time run
 
     Json::Value arrayValue;
     Json::Reader reader;
@@ -284,6 +302,9 @@ void PartSelectionDialog::updateMcuCombobox()
 {
     g_log.log(LL_DEBUG, __PRETTY_FUNCTION__);
 
+    if ( g_mcuData == "" )
+        return; // probably first time run
+
      Json::Value arrayValue;
      Json::Reader reader;
      if ( ! reader.parse( g_mcuData.toStdString(), arrayValue) )
@@ -313,6 +334,9 @@ void PartSelectionDialog::updateMaterialCombobox()
 {
     g_log.log(LL_DEBUG, __PRETTY_FUNCTION__);
 
+    if ( g_materialData == "" )
+        return; // probably first time run
+
      Json::Value arrayValue;
      Json::Reader reader;
      if ( ! reader.parse( g_materialData.toStdString(), arrayValue) )
@@ -329,10 +353,10 @@ void PartSelectionDialog::updateMaterialCombobox()
          Json::Value part = arrayValue[i];
 
          int partId = part.get("id",0).asInt();
-         string maker = part.get("maker","").asString();
-         string material = part.get("material","").asString();
+         string name = part.get("name","").asString();
+         //string material = part.get("material","").asString();
 
-         QString displayText = QString("%1 %2").arg(maker.c_str()).arg(material.c_str());
+         QString displayText = QString("%1").arg(name.c_str());
 
          ui->propMaterialComboBox->addItem(displayText, partId);
      }

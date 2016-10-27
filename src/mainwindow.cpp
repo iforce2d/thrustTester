@@ -4,7 +4,11 @@
 #include <QDateTime>
 #include <QMutexLocker>
 #include <QThread>
-#include <libserialport.h>
+#ifdef WIN32
+    #include "libserialport/libserialport.h"
+#else
+    #include <libserialport.h>
+#endif
 #include <stdio.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -323,9 +327,9 @@ bool MainWindow::openPort()
             g_log.log(LL_ERROR, "Could not set baud rate for port %s", portName.toStdString().c_str());
         }
 
-        /*if ( SP_OK != sp_set_bits(port, 8) ) {
-            g_log.log(LL_ERROR, "Could not set bits for port %s", portName.toStdString().c_str());
-        }*/
+        sp_set_bits(port, 8);
+        sp_set_parity(port, SP_PARITY_INVALID);
+        sp_set_xon_xoff(port, SP_XONXOFF_OUT);
 
         sp_port_config* config;
         sp_new_config(&config);
@@ -361,6 +365,14 @@ bool MainWindow::openPort()
         g_log.log(LL_DEBUG, "    dtr: %d", dtr);
         g_log.log(LL_DEBUG, "    rts: %d", rts);
         g_log.log(LL_DEBUG, "    XonXoff: %d", xonxoff);
+
+        g_log.log(LL_DEBUG, "    sizeof(int16_t): %d", sizeof(int16_t));
+        g_log.log(LL_DEBUG, "    sizeof(uint16_t): %d", sizeof(uint16_t));
+        g_log.log(LL_DEBUG, "    sizeof(int32_t): %d", sizeof(int32_t));
+        g_log.log(LL_DEBUG, "    sizeof(msg_sample): %d", sizeof(msg_sample));
+
+        g_log.log(LL_DEBUG, "    sizeof(msg_sample): %d", sizeof(msg_sample));
+        g_log.log(LL_DEBUG, "    sizeof(_message): %d", sizeof(_message));
 
         m_connectedPort = port;
         m_connectedPortName = portName;
@@ -448,9 +460,26 @@ void MainWindow::setThrottle(unsigned short throttle)
     unsigned char checksum[2];
     calcChecksum(checksum, &outgoingMessage, outgoingPayloadSize);
 
-    sp_blocking_write(m_connectedPort, messageSync, 2, 100);
-    sp_blocking_write(m_connectedPort, &outgoingMessage, outgoingPayloadSize, 100);
-    sp_blocking_write(m_connectedPort, checksum, 2, 100);
+    /*sp_nonblocking_write(m_connectedPort, messageSync, 2);
+    sp_nonblocking_write(m_connectedPort, &outgoingMessage, outgoingPayloadSize);
+    sp_nonblocking_write(m_connectedPort, checksum, 2);*/
+
+    unsigned char buf[7];
+    buf[0] = messageSync[0];
+    buf[1] = messageSync[1];
+    buf[2] = MT_SET_THROTTLE;
+    *((uint16_t*)&buf[3]) = outgoingMessage.setThrottle.throttle;
+    buf[5] = checksum[0];
+    buf[6] = checksum[1];
+
+    sp_blocking_write(m_connectedPort, buf, 7, 100);
+    //int bytesWritten = sp_nonblocking_write(m_connectedPort, buf, 7);
+
+    //g_log.log(LL_DEBUG, "Bytes written: %d", bytesWritten);
+
+    /*sp_blocking_write(m_connectedPort, messageSync, 2, 10);
+    sp_blocking_write(m_connectedPort, &outgoingMessage, outgoingPayloadSize, 10);
+    sp_blocking_write(m_connectedPort, checksum, 2, 10);*/
 
     m_throttle = throttle;
 }
@@ -640,6 +669,8 @@ bool isLineEnabled(int dataIndex) {
 
 void MainWindow::renderGraph()
 {
+    ui->liveGraphWidget->makeCurrent();
+
     glClearColor( 0,0,0, 1 );
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -870,13 +901,15 @@ void MainWindow::onTimer()
     if ( ! m_connectedPort )
         return;
 
-    unsigned char buf[8];
+    unsigned char buf[512];
 
     bool gotSample = false;
 
     while ( sp_input_waiting(m_connectedPort) ) {
-        int read = sp_blocking_read_next(m_connectedPort, buf, 8, 2);
-        for (int i = 0; i < read; i++) {            
+        int read = sp_blocking_read_next(m_connectedPort, buf, 512, 2);
+        for (int i = 0; i < read; i++) {
+            //printf("%c", buf[i]);
+            //fflush(stdout);
             int messageType = processSerialByte(buf[i]);
             if ( MT_NONE != messageType ) {
                 //g_log.log(LL_DEBUG, "Got message %d", messageType);
@@ -884,7 +917,7 @@ void MainWindow::onTimer()
                     g_log.log(LL_DEBUG, "Version: %d", g_message.version.version);
                 }
                 else if ( messageType == MT_SAMPLE ) {
-                    /*g_log.log(LL_DEBUG, "Speed: %d", g_message.sample.speed);
+                    /*g_log.log(LL_DEBUG, "Throttle: %d", g_message.sample.throttle);
                     g_log.log(LL_DEBUG, "Thrust: %ld", g_message.sample.thrust);
                     g_log.log(LL_DEBUG, "Voltage: %ld", g_message.sample.voltage);
                     g_log.log(LL_DEBUG, "Current: %ld", g_message.sample.current);*/
@@ -946,14 +979,15 @@ void MainWindow::onTimer()
             }
         }
         else {
+            int oldThrottle = m_throttle;
             int speed = task->step(m_throttle, m_lastSample);
-            setThrottle(speed);
+            if ( speed != oldThrottle )
+                setThrottle(speed);
         }
     }
 
     renderGraph();
 }
-
 
 void MainWindow::onAfterOpenPort()
 {
@@ -1251,14 +1285,14 @@ void MainWindow::on_exportResultsButton_clicked()
 
 void MainWindow::on_displaySettingsGroupBox_toggled(bool b)
 {
-    ui->displayRawCheckBox->setShown(b);
-    ui->displayThrottleCheckBox->setShown(b);
-    ui->displayThrustCheckBox->setShown(b);
-    ui->displayVoltageCheckBox->setShown(b);
-    ui->displayCurrentCheckBox->setShown(b);
-    ui->displayPowerCheckBox->setShown(b);
-    ui->displayEfficiencyCheckBox->setShown(b);
-    ui->displayRPMCheckBox->setShown(b);
+    ui->displayRawCheckBox->setVisible(b);
+    ui->displayThrottleCheckBox->setVisible(b);
+    ui->displayThrustCheckBox->setVisible(b);
+    ui->displayVoltageCheckBox->setVisible(b);
+    ui->displayCurrentCheckBox->setVisible(b);
+    ui->displayPowerCheckBox->setVisible(b);
+    ui->displayEfficiencyCheckBox->setVisible(b);
+    ui->displayRPMCheckBox->setVisible(b);
 
     g_showDisplaySettings = b;
 

@@ -73,13 +73,8 @@ FORMS    += mainwindow.ui \
     partselectiondialog.ui \
     exportdialog.ui
 
-LIBS += -lserialport
+win32:QMAKE_CXXFLAGS += -mno-ms-bitfields
+win32:LIBS += ..\src\libserialport\libserialport.a -lopengl32 -lsetupapi
 
-macx:LIBS += -framework AppKit -framework Carbon -framework IOKit
-else:{
-    unix:LIBS += -lX11 #-lrt -lXrandr -ljpeg -lfreetype
-    unix:LIBS += -lGL #-lGLU
-}
+unix:LIBS += -lserialport -lX11 -lOpenGL
 
-OTHER_FILES += \
-    ttsNotes.txt

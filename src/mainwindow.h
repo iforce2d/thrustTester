@@ -4,7 +4,11 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <vector>
-#include <libserialport.h>
+#ifdef WIN32
+    #include "libserialport/libserialport.h"
+#else
+    #include <libserialport.h>
+#endif
 #include "messages.h"
 #include "TestTask.h"
 #include "CalibrationDialog.h"

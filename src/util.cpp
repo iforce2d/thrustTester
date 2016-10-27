@@ -98,12 +98,12 @@ bool renameExistingFileAppendModifiedTime( QString filename )
     QString newName = QString::fromUtf8("%1/%2-%3%4%5-%6%7%8.%9")
             .arg(thePath)
             .arg(theBaseName)
-            .arg(dt.date().year()-2000,2,10,QChar::fromAscii('0'))
-            .arg(dt.date().month(),2,10,QChar::fromAscii('0'))
-            .arg(dt.date().day(),2,10,QChar::fromAscii('0'))
-            .arg(dt.time().hour(),2,10,QChar::fromAscii('0'))
-            .arg(dt.time().minute(),2,10,QChar::fromAscii('0'))
-            .arg(dt.time().second(),2,10,QChar::fromAscii('0'))
+            .arg(dt.date().year()-2000,2,10,QChar::fromLatin1('0'))
+            .arg(dt.date().month(),2,10,QChar::fromLatin1('0'))
+            .arg(dt.date().day(),2,10,QChar::fromLatin1('0'))
+            .arg(dt.time().hour(),2,10,QChar::fromLatin1('0'))
+            .arg(dt.time().minute(),2,10,QChar::fromLatin1('0'))
+            .arg(dt.time().second(),2,10,QChar::fromLatin1('0'))
             .arg(theSuffix);
     QFile f(filename);
     bool ret = f.rename( newName );

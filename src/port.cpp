@@ -1,4 +1,8 @@
-#include <libserialport.h>
+#ifdef WIN32
+    #include "libserialport/libserialport.h"
+#else
+    #include <libserialport.h>
+#endif
 #include "port.h"
 #include "Log.h"
 
