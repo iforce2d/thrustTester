@@ -1,0 +1,1 @@
+These files are for building on Windows. If you are building on Linux, you should build and install the libserialport library. You can find the source and instructions here: https://sigrok.org/wiki/Libserialport
