@@ -4,8 +4,7 @@ This project allows an Arduino to interface with a desktop computer to control t
 
 Control of the motor can be scripted to produce repeatable tests by giving specific input values to the motor controller. Using feedback from the sensors, the motor can be made to adjust its speed to meet a desired sensor reading (eg. thrust, rpm). The software to make this happen consists of an Arduino 'sketch' and a Qt based C++ application, which communicate with each other over a USB/serial (UART) connection. 
 
-todo pic of stand  
-![](http://www.iforce2d.net/tmp/paperquad.jpg)
+![](http://www.iforce2d.net/tts/pics/teststand.jpg)
 
 ## Requirements
 
@@ -18,11 +17,11 @@ The sensors and connection pins that the sketch is written for are outlined belo
 ## Components and connections
 ---
 #### Arduino
-I tried this with Arduino Unos. On Linux I had no problems with a 'clone' Arduino using a CH341 USB-to-serial chip, but the same Arduino had big problems on Windows. It seems that the Windows driver for the CH340/CH341 does not play nicely with the libserialport library used by the desktop app. So **if you're using Windows, make sure your Arduino has an FTDI instead of a CH340 or CH341 USB-to-serial adapter**.  
+I tried this with Arduino Unos. On Linux I had no problems with a 'clone' Arduino using a CH341 USB-to-serial chip, but the same Arduino had big problems on Windows. It seems that the Windows driver for the CH340/CH341 does not play nicely with the libserialport library used by the desktop app. So **if you're using Windows, make sure your Arduino has an atmega16u2 instead of a CH340 or CH341 USB-to-serial adapter**.  
 
 There are a lot of connections to make, so it really helps if you can find one of those Unos that have double rows of pins (one male, one female) on each side. The clone Arduino I use on Linux is great because it has the double rows of pins and also a few extra GND pins here and there, plus extra breakouts for 3.3v, I2C and UART (Banggood: https://goo.gl/Y7G7td).
 
-todo pic of arduinos
+![](http://www.iforce2d.net/tts/pics/arduinos.jpg)
 
 ---
 #### Motor speed controller
@@ -32,13 +31,14 @@ ESC <----> Arduino
 - GND     <----> GND
 - Signal     <----> Pin 5
 
-todo pic of ESC
+![](http://www.iforce2d.net/tts/pics/esc.jpg)
 
 ---
 #### Load cell amplifier
 Example load cell (Banggood): https://goo.gl/roJTGl  
 The load cell amplifier is a HX711, these are cheap and easy to find (Banggood: https://goo.gl/fIdfvA). I think you can use either 5v or 3.3v for the VCC, I used 3.3v simply because the 5v pins of the Arduino were in use.  
 
+The connections between the load cell and the amp will depend on the type of load cell you get.
 General info: https://learn.sparkfun.com/tutorials/load-cell-amplifier-hx711-breakout-hookup-guide  
 
 HX711 <----> Arduino
@@ -47,17 +47,23 @@ HX711 <----> Arduino
 - DT     <---->      Pin 3
 - SCK    <---->      Pin 4
 
-todo pic of load cell amp
+![](http://www.iforce2d.net/tts/pics/hx711.jpg)
+
+The HX711 can run at either 10Hz or 80Hz update rate. Obviously we want the faster rate, but most HX711 module boards come configured as 10Hz. To change it to 80Hz you will need to disconnect the RATE pin 15 from the pad it is soldered to, and connect it to VCC (easiest way is to use pin 16 which is right next to it).  
+
+![](http://www.iforce2d.net/tts/pics/hx711rate.jpg)
+
+Do not be a lazy ass and simply connect it to the neighbor without disconnecting it from the pad first - that will cause VCC and GND to be shorted together!
 
 ---
 #### Analog-to-digital converter
 The ADC is a ADS1115 which provides two 16-bit relative converters and communicates with the Arduino via I2C (Banggood: https://goo.gl/OO30Ym).  
 You can use one converter to measure voltage (with an appropriate voltage divider) and the other to measure the output of the Hall sensor (current reading).  
 The voltage divider will depend on the maximum voltage of the battery you intend to test with, and **MUST** ensure that the maximum voltage is under 5v. I used a 10:1 divider (10k and 1k resistors) which means in theory I can test a battery of up to 50v. In practice you might want to avoid pushing that limit. In any case I do not intend to use higher than a 4 cell lipo (16.8v at full charge) so this should be fine.  
+
+![](http://www.iforce2d.net/tts/pics/adcdiag.jpg)
   
 Note that you can also use the analog pins of the arduino directly to measure voltage, but the resolution is only 10 bit (0-1023) which is not so good. For example a 3S lipo going from full charge (12.6v) to low charge (say 10.6v) is 2v change, so a 10:1 voltage divider sees 0.2v change, or 0.2/5 of the 0-1023 range which is only about 40 discrete steps, ie. a resolution of about 0.05v per step. Acceptable I suppose, but the situation is worse for the current sensor which deals in smaller ranges. If you only want to measure voltage, using a simple analogRead would probably be fine, but if you want to measure current and you have a ADS1115 you might as well also use it to measure the voltage, so the 16-bit ADC will give a voltage resolution of around 0.0008v.
-
-todo circuit diagram
 
 General info: http://henrysbench.capnfatz.com/henrys-bench/arduino-voltage-measurements/arduino-ads1115-module-getting-started-tutorial
 
@@ -71,7 +77,8 @@ ADS1115 <----> Arduino
 - A2     <---->        GND
 - A3     <---->        OUT pin of ACS712
 
-todo pic of adc setup
+![](http://www.iforce2d.net/tts/pics/adc1.jpg)
+![](http://www.iforce2d.net/tts/pics/adc2.jpg)
 
 ---
 #### Hall (current) sensor
@@ -82,11 +89,11 @@ General info: http://embedded-lab.com/blog/a-brief-overview-of-allegro-acs712-cu
 
 ACS712 <----> Arduino
 - GND     <---->      GND
-- VDD     <---->      5v
+- VCC     <---->      5v
 - OUT     <---->      A3 of ADS1115 
 - Sense terminals should bridge a break in the main power line
 
-todo pic of hall sensor
+![](http://www.iforce2d.net/tts/pics/acs712.jpg)
 
 ---
 #### Laser TX
@@ -96,12 +103,16 @@ TX <----> Arduino
 - GND <---->         GND
 - VCC (S)   <---->   5v
 
+![](http://www.iforce2d.net/tts/pics/lasertx.jpg)
+
 ---
 #### Laser RX
 RX <----> Arduino
 - GND    <---->      GND
 - VCC    <---->      5v
 - OUT    <---->      Pin 2
+
+![](http://www.iforce2d.net/tts/pics/laserrx.jpg)
 
 --- 
 #### Buzzer
@@ -110,11 +121,16 @@ Example (Banggood) https://goo.gl/Y11zJG
 
 Buzzer <----> Arduino
 - GND    <---->      GND
-- VCC    <---->      Pin 7
+- VCC (+)    <---->      Pin 7
+
+![](http://www.iforce2d.net/tts/pics/buzzer.jpg)
 
 --- 
-#### Your brain
-Keep in mind that **there is potential for injury** here. There is currently no concept of 'arming' or a disarmed state so the motor will spin any time the battery is connected and the slider in the desktop app is moved, or when the scripted test is executed. By the nature of this kind of testing the motor will sometimes be taken to the full-throttle limit, and these motors have tons of power. Even a little 1804 on 3S is quite scary to have nearby at full blast. I have not seen any issues with spurious control inputs or any sudden unwanted motor startups, but please regard your test stand with a healthy degree of suspicion when the battery is connected. Ideally, only connect the battery when you're about to run a test, add a buzzer to your setup, and have a 'beep' and 'wait' step in your script as an audible warning before continuing with the test. I take no responsibility for any accidents that might occur!
+
+## Safety concerns
+Keep in mind that **there is potential for injury** here. There is currently no concept of 'arming' or a disarmed state so the motor will spin any time the battery is connected and the slider in the desktop app is moved, or when the scripted test is executed. By the nature of this kind of testing the motor will sometimes be taken to the full-throttle limit, and these motors have tons of power. Even a little 1804 on 3S is quite scary to have nearby at full blast. I have not seen any issues with spurious control inputs or any sudden unwanted motor startups, but please regard your test stand with a healthy degree of suspicion when the battery is connected. Ideally, only connect the battery when you're about to run a test, add a buzzer to your setup, and have a 'beep' and 'wait' step in your script as an audible warning before continuing with the test.  
+
+Make sure your test stand is solidly constructed and cannot wobble around or tip over when the motor is unleashed. You might want to also have a screen of some kind between you and the motor just in case a prop breaks and the blade flies out. I take no responsibility for any accidents that might occur!
 
 ---
 
