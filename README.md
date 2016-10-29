@@ -177,6 +177,10 @@ Any lines not recognized as one of these formats will be ignored. Lines that are
 
 **Warning**: Do not use values for the constant thrust or constant rpm tests that you have not already seen to be viable, either manually by using the slider, or by running a constant throttle test. For example if your motor setup gives you 350g thrust and 9500rpm at full throttle, you cannot expect the automatically adjusting tests to achieve anything higher than that. Ideally you should set your target values for thrust or rpm to be considerably less than this, because the battery will sag as the test progresses.
 
+## Online test results
+
+The desktop app interfaces with iforce2d.net to fetch lists of parts, and to upload your test results for others to see. For more details about this, please see this YouTube video: (todo link, search for 'iforce2d thrust tester')
+
 ## Binaries
 
 You can find builds of the desktop app for Linux and Windows in the ['bin' folder](bin). Don't ask me for a Mac build.
