@@ -12,7 +12,9 @@ You will need a 5v/16MHz Arduino (I tested with Arduino Unos), a Linux or Window
 
 If you are willing to modify the parts of the Arduino sketch that read the sensors, you could instead use other kinds of sensors fairly easily (but increasing the total number of sensors above four will involve considerable work on both the Arduino sketch and the desktop program).
 
-The sensors and connection pins that the sketch is written for are outlined below. You can find an explanation of this setup on YouTube: (todo link, search for 'iforce2d thrust tester')
+The sensors and connection pins that the sketch is written for are outlined below. You can find an explanation of this setup on YouTube: (todo link, search for 'iforce2d thrust tester')  
+
+The main graph view of the desktop app uses OpenGL, so your computer should have some decent graphics hardware to display this.
 
 ## Components and connections
 ---
@@ -148,6 +150,32 @@ At this point you should be ready to start. Some points to note:
  - disconnecting or closing the app while the motor is running should also set the throttle value to zero
 
 For more details about how the app works, please see this YouTube video: (todo link, search for 'iforce2d thrust tester')
+
+## Sensor calibration
+
+Click the 'Calibrate sensors' button to bring up the sensor calibration dialog. Calibration consists of taking a measurement of a zero value (eg. zero thrust, zero voltage, zero current) and a known non-zero value. To measure a known non-zero value for thrust you will need something to hang from the motor/prop that you know the weight of. To measure a non-zero voltage/current you will need a multi-meter. 
+
+**Thrust**: With the prop on the motor (battery disconnected!) click 'Measure zero'. Hang your known weight from the motor shaft, enter the weight in the text input and click 'Measure known weight'.
+
+**Voltage**: With the battery disconnected click 'Measure zero'. With the battery connected, measure the battery voltage with your multi-meter, enter it in the text input and click 'Measure voltage'.
+
+**Current**: With the battery disconnected click 'Measure zero'. Connect your multi-meter in series with the battery. With the battery connected, use the slider in the main window to set the motor to a medium speed. Enter the current as shown on your multi-meter into the text input and click 'Measure voltage'.
+
+## Test definition
+
+Clicking the 'Define test' button will bring up a dialog where you can define a sequence of inputs to give to the motor controller. This is done by entering some text in the left hand side of the dialog. Each line of text represents one 'test' and is of the format _type_ , _duration_, _parameter_ where the meaning of 'parameter' will depend on the type of test. Test types are wait (w), beep (b), constant throttle/speed (s), constant thrust (t), constant rpm (r).  
+
+Examples:
+
+- w, 2  =  wait for two seconds
+- b, 1 = beep for one second
+- s, 5, 1200 = set the throttle value to 1200μs for five seconds
+- t, 5, 150 = adjust the throttle to produce 150g of thrust for five seconds
+- r, 5, 3000 = adjust the throttle to produce 3000rpm for five seconds
+
+Any lines not recognized as one of these formats will be ignored. Lines that are recognized will be listed on the right hand side of the dialog.
+
+**Warning**: Do not use values for the constant thrust or constant rpm tests that you have not already seen to be viable, either manually by using the slider, or by running a constant throttle test. For example if your motor setup gives you 350g thrust and 9500rpm at full throttle, you cannot expect the automatically adjusting tests to achieve anything higher than that. Ideally you should set your target values for thrust or rpm to be considerably less than this, because the battery will sag as the test progresses.
 
 ## Binaries
 
