@@ -179,7 +179,10 @@ Any lines not recognized as one of these formats will be ignored. Lines that are
 
 ## Online test results
 
-The desktop app interfaces with iforce2d.net to fetch lists of parts, and to upload your test results for others to see. For more details about this, please see this YouTube video: (todo link, search for 'iforce2d thrust tester')
+The desktop app interfaces with iforce2d.net to fetch lists of parts, and to upload your test results for others to see. Work on this will probably not be continued, fwiw you can find it here:
+http://www.iforce2d.net/tts/parts.html
+http://www.iforce2d.net/tts/reports.html
+For more details about this, please see this YouTube video: (todo link, search for 'iforce2d thrust tester')
 
 ## Binaries
 
