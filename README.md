@@ -12,12 +12,12 @@ You will need a 5v/16MHz Arduino (I tested with Arduino Unos), a Linux or Window
 
 If you are willing to modify the parts of the Arduino sketch that read the sensors, you could instead use other kinds of sensors fairly easily (but increasing the total number of sensors above four will involve considerable work on both the Arduino sketch and the desktop program).
 
-The sensors and connection pins that the sketch is written for are outlined below. You can find an explanation of this setup on YouTube: (todo link, search for 'iforce2d thrust tester')  
+The sensors and connection pins that the sketch is written for are outlined below. You can find an explanation of this setup on YouTube: https://youtu.be/PfVJmci9IQQ  
 
 The main graph view of the desktop app uses OpenGL, so your computer should have some decent graphics hardware to display this.
 
 ## Components and connections
----
+
 #### Arduino
 I tried this with Arduino Unos. On Linux I had no problems with a 'clone' Arduino using a CH341 USB-to-serial chip, but the same Arduino had big problems on Windows. It seems that the Windows driver for the CH340/CH341 does not play nicely with the libserialport library used by the desktop app. So **if you're using Windows, make sure your Arduino has an atmega16u2 instead of a CH340 or CH341 USB-to-serial adapter**.  
 
@@ -146,10 +146,10 @@ If you do not see the graph values scrolling in, the connection either failed or
 
 At this point you should be ready to start. Some points to note:
 - with a battery connected to the ESC, you should be able to move the slider to control the motor speed
- - hitting the Escape key at any time will set the throttle value to zero and abort any test that was running
- - disconnecting or closing the app while the motor is running should also set the throttle value to zero
+- hitting the Escape key at any time will set the throttle value to zero and abort any test that was running
+- disconnecting or closing the app while the motor is running should also set the throttle value to zero
 
-For more details about how the app works, please see this YouTube video: (todo link, search for 'iforce2d thrust tester')
+For more details about how the app works, please see this YouTube video: https://youtu.be/PfVJmci9IQQ
 
 ## Sensor calibration
 
@@ -182,7 +182,7 @@ Any lines not recognized as one of these formats will be ignored. Lines that are
 The desktop app interfaces with iforce2d.net to fetch lists of parts, and to upload your test results for others to see. Work on this will probably not be continued, fwiw you can find it here:  
 http://www.iforce2d.net/tts/parts.html  
 http://www.iforce2d.net/tts/reports.html  
-For more details about this, please see this YouTube video: (todo link, search for 'iforce2d thrust tester')
+For more details about this, please see this YouTube video: https://youtu.be/PfVJmci9IQQ
 
 ## Binaries
 
