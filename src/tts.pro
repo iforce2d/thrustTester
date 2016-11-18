@@ -10,6 +10,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = tts
 TEMPLATE = app
+macx:INCLUDEPATH += /usr/local/include
+macx:QMAKE_LIBDIR += /usr/local/lib
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -76,5 +78,6 @@ FORMS    += mainwindow.ui \
 win32:QMAKE_CXXFLAGS += -mno-ms-bitfields
 win32:LIBS += ..\src\libserialport\libserialport.a -lopengl32 -lsetupapi
 
-unix:LIBS += -lserialport -lX11 -lOpenGL
+unix:LIBS += -lserialport
+unix:!macx += -lX11 -lOpenGL
 
