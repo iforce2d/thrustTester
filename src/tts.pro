@@ -79,5 +79,5 @@ win32:QMAKE_CXXFLAGS += -mno-ms-bitfields
 win32:LIBS += ..\src\libserialport\libserialport.a -lopengl32 -lsetupapi
 
 unix:LIBS += -lserialport
-unix:!macx:LIBS += -lX11 -lOpenGL
+unix:!macx:LIBS += -lX11 -lGL
 
