@@ -194,5 +194,12 @@ On Linux you will need to first build and install the libserialport library. Thi
 The desktop app has been checked with Qt 4.8 on Linux and Qt 5.7 on Windows. The .pro file should open and build with QtCreator without issue (mingw32 on Windows).  
 Actually 'should' is a little too confident... let's say it 'might' build without issue.  
 
+On OSX you need to install qt4 and libserialport using brew. see http://brew.sh/
+
+$ brew install qt4
+$ brew install --HEAD rene-dev/sigrok/libserialport
+$ qmake tts.pro
+$ make
+$ open tts.app
 
 
